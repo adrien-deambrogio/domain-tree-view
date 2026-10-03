@@ -1,11 +1,9 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
-	"version": "1.0.0",
-	"minAppVersion": "1.0.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
-	"isDesktopOnly": false
+  "id": "domain-tree",
+  "name": "Domain Tree",
+  "version": "1.0.0",
+  "minAppVersion": "1.4.0",
+  "description": "Wikipedia-style multi-level domain tree built automatically from a 'parents' property. Notes can belong to several parents.",
+  "author": "You",
+  "isDesktopOnly": false
 }

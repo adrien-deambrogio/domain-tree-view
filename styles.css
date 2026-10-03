@@ -1,8 +1,14 @@
-/*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
+.dt-container { padding: 16px 24px; max-width: 900px; margin: 0 auto; }
+.dt-toolbar { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.dt-search { flex: 1; min-width: 140px; }
+.dt-tree { list-style: none; margin: 0; padding-left: 0; }
+.dt-tree .dt-tree { padding-left: 1.4em; border-left: 1px solid var(--background-modifier-border); margin-left: 0.45em; }
+.dt-item { padding: 2px 0 2px 0.2em; }
+.dt-branch > .dt-summary { cursor: pointer; font-weight: 600; padding: 2px 0; }
+.dt-item > .dt-link { padding-left: 1.1em; }
+.dt-link { color: var(--link-color); text-decoration: none; cursor: pointer; }
+.dt-link:hover { text-decoration: underline; }
+.dt-unresolved { color: var(--text-faint); font-style: italic; }
+.dt-count, .dt-cycle { color: var(--text-faint); font-size: var(--font-ui-smaller); font-weight: 400; }
+.dt-unclassified { margin-top: 20px; color: var(--text-muted); }
+.dt-empty { color: var(--text-muted); padding: 20px 0; }
