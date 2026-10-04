@@ -8,7 +8,7 @@ export const VIEW_TYPE = "domain-tree-view";
 
 export class DomainTreeView extends ItemView {
 	private host: TreeHost;
-	/* records which tree nodes the user has manually expanded or collapsed.
+	/** records which tree nodes the user has manually expanded or collapsed.
 	* - Key: a node identifier. In setAll the keys come from this.graph.children.keys(),
 	* so they are the node names/ids in the graph.
 	* - Value: true if the node is expanded, false if collapsed.
@@ -54,11 +54,23 @@ export class DomainTreeView extends ItemView {
 	}
 
 	/** Toolbar is created once, so the search box keeps focus and caret. */
+	/** Toolbar is created once, so the search box keeps focus and caret. */
 	private buildToolbar(): void {
 		const el = this.contentEl;
 		el.empty();
 
 		const bar = el.createDiv({ cls: "dt-toolbar" });
+		this.addSearchBox(bar);
+
+		this.addToolbarButton(bar, "Expand all", () => this.setAll(true));
+		this.addToolbarButton(bar, "Collapse all", () => this.setAll(false));
+		this.addToolbarButton(bar, "Refresh", () => this.refresh(true));
+
+		this.treeEl = el.createDiv({ cls: "dt-tree-host" });
+	}
+
+	/** Creates the filter input and wires up a debounced handler. */
+	private addSearchBox(bar: HTMLElement): HTMLInputElement {
 		const search = bar.createEl("input", {
 			type: "search",
 			placeholder: "Filter…",
@@ -75,16 +87,14 @@ export class DomainTreeView extends ItemView {
 			true,
 		);
 		this.registerDomEvent(search, "input", applyFilter);
+		return search;
+	}
 
-		const addButton = (label: string, fn: () => void): void => {
-			const btn = bar.createEl("button", { text: label, cls: "dt-btn" });
-			this.registerDomEvent(btn, "click", fn);
-		};
-		addButton("Expand all", () => this.setAll(true));
-		addButton("Collapse all", () => this.setAll(false));
-		addButton("Refresh", () => this.refresh(true));
-
-		this.treeEl = el.createDiv({ cls: "dt-tree-host" });
+	/** Adds a button to the toolbar and registers its click handler. */
+	private addToolbarButton(bar: HTMLElement, label: string, fn: () => void): HTMLButtonElement {
+		const btn = bar.createEl("button", { text: label, cls: "dt-btn" });
+		this.registerDomEvent(btn, "click", fn);
+		return btn;
 	}
 
 	/** Forget user open/close choices so the depth setting applies again. */
@@ -136,22 +146,24 @@ export class DomainTreeView extends ItemView {
 		this.renderTreeOnly();
 	}
 
+	/**
+	 * Open a tree node in a leaf other than this view's own, so a click never
+	 * replaces the tree. Creates the note if it doesn't exist yet.
+	 */
 	private async openNode(node: TreeNode, evt: MouseEvent): Promise<void> {
-		// Pass the pane type through so Ctrl/Cmd+Alt (split) etc. behave as usual.
-		const mod = Keymap.isModEvent(evt);
-		if (node.file) {
-			await this.targetLeaf(mod).openFile(node.file);
-		} else {
-			await this.app.workspace.openLinkText(node.name, "", mod); // creates the note
-			this.refresh(true);
-		}
-	}
-
-	/** Pick a leaf that is never this view's own leaf, so a click can't replace the tree. */
-	private targetLeaf(mod: PaneType | boolean): WorkspaceLeaf {
 		const { workspace } = this.app;
-		if (mod) return workspace.getLeaf(mod);
-		const leaf = workspace.getLeaf(false);
-		return leaf === this.leaf ? workspace.getLeaf("tab") : leaf;
+		const mod = Keymap.isModEvent(evt); // PaneType | boolean: Ctrl/Cmd(+Alt) split/tab/window
+											// Check `isModEvent` for more info
+
+		// create new file if no existing
+		if (!node.file) {
+			await workspace.openLinkText(node.name, "", mod);
+			this.refresh(true);
+			return;
+		}
+
+		let leaf = workspace.getLeaf(mod);
+		if (!mod && leaf === this.leaf) leaf = workspace.getLeaf("tab"); // Check `getLeaf` for more info
+		await leaf.openFile(node.file);
 	}
 }
