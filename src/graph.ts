@@ -20,16 +20,7 @@ export function flatten(value: unknown): string[] {
 	return [String(value)];
 }
 
-/** "[[Science|alias#heading]]" -> "Science" */
-export function cleanLink(raw: string): string {
-	let t = raw.trim();
-	const m = t.match(/^\[\[(.+?)\]\]$/);
-	const capture = m?.[1];
-	if (capture !== undefined) t = capture;
-	const [withoutAlias = ""] = t.split("|");
-	const [target = ""] = withoutAlias.split("#");
-	return target.trim();
-}
+
 
 /* ------------------------------- Graph --------------------------------- */
 
@@ -67,22 +58,28 @@ export function buildGraph(app: App, parentsProperty: string): Graph {
 
 	// Pass 2: read each note's parent links and record the edges.
 	for (const f of files) {
+		// Get front matter (YAML)
 		const fm = app.metadataCache.getFileCache(f)?.frontmatter;
 		if (!fm) continue;
+		// For parent propertie links in front matter
 		for (const item of flatten(fm[parentsProperty])) {
-			const link = cleanLink(item);
+			// Clean link. If no link in the end, continue
+			// "[[Science]]" -> "Science". Returns "" for anything that isn't a wikilink.
+			const link = item.trim().match(/^\[\[(.+?)\]\]$/)?.[1]?.trim();
 			if (!link) continue;
+
+			// Get file associated to link + path ? 
 			const dest = app.metadataCache.getFirstLinkpathDest(link, f.path);
 			// A link may resolve to a PDF, image, canvas, etc. Those are not in
 			// `nodes`, so using them as keys would break rendering.
 			if (dest && !nodes.has(dest.path)) continue;
 
-			// Build parent id
+			// Get parent id (parent path)
 			let parentID: string;
 			if (dest) {
 				parentID = dest.path;
 			} else {
-				// Unresolved link: get or create a placeholder node with no file.
+				// Unresolved link (link with no file attached): get or create a placeholder node with no file.
 				// Lowercased key merges spellings; the first-seen casing is displayed.
 				parentID = "virtual:" + link.toLowerCase();
 				if (!nodes.has(parentID)) {
