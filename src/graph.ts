@@ -55,14 +55,14 @@ export function getNode(graph: Graph, key: string): TreeNode {
  * - `hasParent`: keys of notes with at least one parent (the rest are roots)
  */
 export function buildGraph(app: App, parentsProperty: string): Graph {
-	const nodes = new Map<string, TreeNode>();
-	const children = new Map<string, Set<string>>();
-	const hasParent = new Set<string>();
+	const nodes = new Map<string, TreeNode>(); // See `Graph`
+	const children = new Map<string, Set<string>>(); // See `Graph`
+	const hasParent = new Set<string>(); // See `Graph`
 
 	// Pass 1: one node per markdown file, so parent links can be checked against it.
 	const files = app.vault.getMarkdownFiles();
 	for (const f of files) {
-		nodes.set(f.path, { key: f.path, name: f.basename, file: f });
+		nodes.set(f.path, { id: f.path, name: f.basename, file: f });
 	}
 
 	// Pass 2: read each note's parent links and record the edges.
@@ -77,6 +77,7 @@ export function buildGraph(app: App, parentsProperty: string): Graph {
 			// `nodes`, so using them as keys would break rendering.
 			if (dest && !nodes.has(dest.path)) continue;
 
+			// Build parent id
 			let parentKey: string;
 			if (dest) {
 				parentKey = dest.path;
@@ -85,7 +86,7 @@ export function buildGraph(app: App, parentsProperty: string): Graph {
 				// Lowercased key merges spellings; the first-seen casing is displayed.
 				parentKey = "virtual:" + link.toLowerCase();
 				if (!nodes.has(parentKey)) {
-					nodes.set(parentKey, { key: parentKey, name: link, file: null });
+					nodes.set(parentKey, { id: parentKey, name: link, file: null });
 				}
 			}
 

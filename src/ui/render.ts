@@ -75,9 +75,9 @@ export function renderTree(host: HTMLElement, ctx: RenderContext): void {
 
 	if (settings.showUnclassified) {
 		const orphans = [...nodes.values()]
-			.filter((n) => n.file && !hasParent.has(n.key) && !children.has(n.key))
+			.filter((n) => n.file && !hasParent.has(n.id) && !children.has(n.id))
 			.filter((n) => !q || n.name.toLowerCase().includes(q))
-			.map((n) => n.key)
+			.map((n) => n.id)
 			.sort(byName);
 		if (orphans.length) {
 			const det = host.createEl("details", { cls: "dt-unclassified" });
@@ -115,7 +115,7 @@ function visibleKeys(graph: Graph, q: string): Set<string> | null {
 	const visible = new Set<string>();
 	const stack: string[] = [];
 	for (const n of graph.nodes.values()) {
-		if (n.name.toLowerCase().includes(q)) stack.push(n.key);
+		if (n.name.toLowerCase().includes(q)) stack.push(n.id);
 	}
 	while (stack.length) {
 		const k = stack.pop();
