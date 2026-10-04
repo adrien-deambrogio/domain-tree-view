@@ -78,21 +78,21 @@ export function buildGraph(app: App, parentsProperty: string): Graph {
 			if (dest && !nodes.has(dest.path)) continue;
 
 			// Build parent id
-			let parentKey: string;
+			let parentID: string;
 			if (dest) {
-				parentKey = dest.path;
+				parentID = dest.path;
 			} else {
 				// Unresolved link: get or create a placeholder node with no file.
 				// Lowercased key merges spellings; the first-seen casing is displayed.
-				parentKey = "virtual:" + link.toLowerCase();
-				if (!nodes.has(parentKey)) {
-					nodes.set(parentKey, { id: parentKey, name: link, file: null });
+				parentID = "virtual:" + link.toLowerCase();
+				if (!nodes.has(parentID)) {
+					nodes.set(parentID, { id: parentID, name: link, file: null });
 				}
 			}
 
-			if (parentKey === f.path) continue; // ignore self-parenting
-			let set = children.get(parentKey);
-			if (!set) children.set(parentKey, (set = new Set()));
+			if (parentID === f.path) continue; // ignore self-parenting
+			let set = children.get(parentID);
+			if (!set) children.set(parentID, (set = new Set()));
 			set.add(f.path);
 			hasParent.add(f.path);
 		}
