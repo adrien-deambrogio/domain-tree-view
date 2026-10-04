@@ -58,26 +58,26 @@ export function buildGraph(app: App, parentsProperty: string): Graph {
 
 	// Pass 2: read each note's parent links and record the edges.
 	for (const f of files) {
-		// Get front matter (YAML)
+		// Get front matter
 		const fm = app.metadataCache.getFileCache(f)?.frontmatter;
 		if (!fm) continue;
-		// For parent propertie links in front matter
+		// For parent property links in front matter ([[Science]], [[University]]...)
 		for (const item of flatten(fm[parentsProperty])) {
 			// Clean link. If no link in the end, continue
-			// "[[Science]]" -> "Science". Returns "" for anything that isn't a wikilink.
+			// "[[Science]]" -> "Science". "" for anything that isn't a wikilink.
 			const link = item.trim().match(/^\[\[(.+?)\]\]$/)?.[1]?.trim();
 			if (!link) continue;
 
-			// Get file associated to link + path ? 
-			const dest = app.metadataCache.getFirstLinkpathDest(link, f.path);
-			// A link may resolve to a PDF, image, canvas, etc. Those are not in
-			// `nodes`, so using them as keys would break rendering.
-			if (dest && !nodes.has(dest.path)) continue;
+			// Get file associated to link ("Science")
+			// + path of the note that contains the link (the child) ("Physics/Quantum Mechanics.md") ? 
+			const parentFile = app.metadataCache.getFirstLinkpathDest(link, f.path);
+			// resolved, but not a markdown note (PDF, image, canvas, etc., there are not in `nodes`) → skip 
+			if (parentFile && !nodes.has(parentFile.path)) continue;
 
 			// Get parent id (parent path)
 			let parentID: string;
-			if (dest) {
-				parentID = dest.path;
+			if (parentFile) {
+				parentID = parentFile.path;
 			} else {
 				// Unresolved link (link with no file attached): get or create a placeholder node with no file.
 				// Lowercased key merges spellings; the first-seen casing is displayed.
@@ -88,7 +88,7 @@ export function buildGraph(app: App, parentsProperty: string): Graph {
 			}
 
 			if (parentID === f.path) continue; // ignore self-parenting
-			let set = children.get(parentID);
+			let set = children.get(parentID); // set is not a setter, but the array with unique values
 			if (!set) children.set(parentID, (set = new Set()));
 			set.add(f.path);
 			hasParent.add(f.path);
