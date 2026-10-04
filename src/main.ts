@@ -38,7 +38,7 @@ export default class DomainTreePlugin extends Plugin {
 		}
 	}
 
-	/** Open in the left sidebar, like other tree navigators. */
+	/** Open the tree view in the left sidebar. */
 	async activateView(): Promise<void> {
 		const { workspace } = this.app;
 		let leaf: WorkspaceLeaf | null = workspace.getLeavesOfType(VIEW_TYPE)[0] ?? null;

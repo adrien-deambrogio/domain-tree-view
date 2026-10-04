@@ -13,6 +13,9 @@ export const DEFAULT_SETTINGS: DomainTreeSettings = {
 	showUnclassified: true,
 };
 
+/**
+ * For plug-in settings window in Obsidian 
+ */
 export class DomainTreeSettingTab extends PluginSettingTab {
 	private plugin: DomainTreePlugin;
 

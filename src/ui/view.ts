@@ -8,6 +8,11 @@ export const VIEW_TYPE = "domain-tree-view";
 
 export class DomainTreeView extends ItemView {
 	private host: TreeHost;
+	/* records which tree nodes the user has manually expanded or collapsed.
+	* - Key: a node identifier. In setAll the keys come from this.graph.children.keys(),
+	* so they are the node names/ids in the graph.
+	* - Value: true if the node is expanded, false if collapsed.
+	*/
 	private openState = new Map<string, boolean>();
 	private filter = "";
 
@@ -99,6 +104,9 @@ export class DomainTreeView extends ItemView {
 		this.dirty = false;
 		const graph = buildGraph(this.app, this.host.settings.parentsProperty);
 		this.graph = graph;
+
+		// Creates a comparator that sorts tree nodes by their display name using locale-aware
+		// comparison that ignores case and accents.
 		const collator = new Intl.Collator(undefined, { sensitivity: "base" });
 		this.byName = (a, b) =>
 			collator.compare(getNode(graph, a).name, getNode(graph, b).name);
